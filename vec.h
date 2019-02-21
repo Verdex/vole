@@ -1,4 +1,5 @@
 
+
 #define vec_def(type) \
 struct vec_##type { \
     size_t capacity; \
