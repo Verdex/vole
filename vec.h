@@ -55,7 +55,7 @@ struct vec_##type * vec_##type##_with_array( type * array, size_t count ) { \
     } \
     struct vec_##type * ret = local_vec_alloc(); \
     type * items = local_item_alloc( count ); \
-    memcpy( items, array, count ); \
+    memcpy( items, array, sizeof( type ) * count ); \
     ret->capacity = count; \
     ret->count = count; \
     ret->items = items; \
@@ -65,7 +65,7 @@ struct vec_##type * vec_##type##_with_array( type * array, size_t count ) { \
 struct stable_##type * stable_##type##_with_array( type * array, size_t count ) { \
     struct stable_##type * ret = local_stable_alloc(); \
     type * items = local_item_alloc( count ); \
-    memcpy( items, array, count ); \
+    memcpy( items, array, sizeof( type ) * count ); \
     ret->count = count; \
     ret->items = items;\
     return ret; \
