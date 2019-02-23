@@ -31,3 +31,10 @@ static void local_stable_free(void* p) {
 vec_def(int)
 
 vec_code(int)
+
+
+int main() {
+
+
+    return 0;
+}
