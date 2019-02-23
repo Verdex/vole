@@ -10,22 +10,22 @@ struct vec_##type { \
 }; \
  \
 struct stable_##type { \
-    const size_t count; \
-    const type * const items; \
-} \
+    size_t count; \
+    type * items; \
+}; \
  \
 struct slice_##type { \
-    const size_t count; \
-    const type * const items; \
-} \
+    size_t count; \
+    type * items; \
+}; \
  \
 struct vec_##type * vec_##type##_with_capacity( size_t capacity ); \
-struct vec_##type * vec_##type##_with_array( type * array ); \
-struct stable_##type * stable_##type##_with_array( type * array ); \
+struct vec_##type * vec_##type##_with_array( type * array, size_t count ); \
+struct stable_##type * stable_##type##_with_array( type * array, size_t count ); \
 void vec_##type##_push( struct vec_##type * vec, type item ); \
 bool vec_##type##_pop( struct vec_##type * vec, type * item ); \
-void vec_##type##_delete( vec_##type ** vec ); \
-void stable_##type##_delete( stable_##type ** stable ); \
+void vec_##type##_delete( struct vec_##type * vec ); \
+void stable_##type##_delete( struct stable_##type * stable ); \
 struct stable_##type * vec_##type##_move_stable( struct vec_##type * vec ); \
 struct slice_##type stable_##type##_slice( struct stable_##type * stable, int start, int end ); \
 struct slice_##type slice_##type##_slice( struct slice_##type slice, int start, int end );
@@ -38,6 +38,9 @@ struct slice_##type slice_##type##_slice( struct slice_##type slice, int start, 
 // size_t
 #define vec_code(type) \
 struct vec_##type * vec_##type##_with_capacity( size_t capacity ) { \
+    if ( capacity == 0 ) { \
+        return NULL; \
+    } \
     struct vec_##type * ret = local_vec_alloc(); \
     type * items = local_item_alloc( capacity ); \
     ret->capacity = capacity; \
@@ -59,27 +62,63 @@ struct vec_##type * vec_##type##_with_array( type * array, size_t count ) { \
     return ret; \
 } \
  \
-struct stable_##type * stable_##type##_with_array( type * array ) { \
+struct stable_##type * stable_##type##_with_array( type * array, size_t count ) { \
     struct stable_##type * ret = local_stable_alloc(); \
     type * items = local_item_alloc( count ); \
     memcpy( items, array, count ); \
-    struct stable_##type temp = { count, items }; \
-    memcpy( ret, &temp, sizeof( struct stable_##type ) ); \
+    ret->count = count; \
+    ret->items = items;\
     return ret; \
 } \
  \
-void vec_##type##_push( struct vec_##type * vec, type item ); \
-bool vec_##type##_pop( struct vec_##type * vec, type * item ); \
+void vec_##type##_push( struct vec_##type * vec, type item ) { \
+    if ( vec->capacity == vec->count ) { \
+        vec->capacity *= 2; \
+        type * n = local_item_alloc( vec->capacity ); \
+        memcpy(n, vec->items, sizeof( type ) * vec->count); \
+        local_item_free(vec->items); \
+        vec->items = n; \
+    } \
+    vec->items[vec->count] = item; \
+    vec->count++; \
+} \
  \
-void vec_##type##_delete( vec_##type ** vec ) { \
-    local_item_free( (*vec)->items );
-    local_vec_free( *vec );
-    *vec = NULL;
-} \ 
-void stable_##type##_delete( stable_##type ** stable ); \
-struct stable_##type * vec_##type##_move_stable( struct vec_##type ** vec ); \
-struct slice_##type stable_##type##_slice( struct stable_##type * stable, int start, int end ); \
-struct slice_##type slice_##type##_slice( struct slice_##type slice, int start, int end );
+bool vec_##type##_pop( struct vec_##type * vec, type * item ) { \
+    if ( vec->count == 0 ) { \
+        return false; \
+    } \
+    vec->count--; \
+    *item = vec->items[vec->count]; \
+    return true; \
+ } \
+ \
+void vec_##type##_delete( struct vec_##type * vec ) { \
+    local_item_free( vec->items ); \
+    local_vec_free( vec ); \
+} \
+ \
+void stable_##type##_delete( struct stable_##type * stable ) { \
+    local_item_free( stable->items ); \
+    local_stable_free( stable ); \
+}\
+ \
+struct stable_##type * vec_##type##_move_stable( struct vec_##type * vec ) { \
+    struct stable_##type * ret = local_stable_alloc(); \
+    ret->count = vec->count; \
+    ret->items = vec->items; \
+    local_vec_free( vec ); \
+    return ret; \
+} \
+ \
+struct slice_##type stable_##type##_slice( struct stable_##type * stable, int start, int end ) { \
+    struct slice_##type ret = { end - start, stable->items + start }; \
+    return ret; \
+} \
+ \
+struct slice_##type slice_##type##_slice( struct slice_##type slice, int start, int end ) { \
+    struct slice_##type ret = { end - start, slice.items + start }; \
+    return ret; \
+}
 
 
 // foreach, vec, slice, array, stable
