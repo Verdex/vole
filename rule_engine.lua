@@ -3,6 +3,8 @@ local match_type = {}
 local function match(name, pred) 
     assert(name, "must provide a name")
     assert(name ~= '', "name must not be ''")
+    assert(pred, "must have predicate")
+    assert(type(pred) == "function", "predicate must be funcion")
 
     return { type = match_type
            , name = name
@@ -90,22 +92,52 @@ local function match_ref(name)
     return {type = match_ref_type, name = name}
 end
 
+local sub = string.sub
+local at = function (s, i) return sub(s, i, i) end
+
+local function check_rule(rule, env, input, index) -- : (success:bool, index:int, capture:(name,value))
+    if rule.type == match_ref_type then
+        local m = env[rule.name]
+        if m.pred(at(input,index)) then 
+            return m.pred, index + 1 
+        else
+            return false, index
+        end
+    elseif rule.type == rule_ref_type then
+        local r = env[rule.name]
+        local temp_index = index
+        for _, v in ipairs(rule.rules) do
+            local success, temp_index, captures = check_rule(v, env, input, temp_index)
+        end
+    elseif rule.type == alt_type then
+
+    elseif rule.type == zero_type then
+
+    elseif rule.type == one_type then
+
+    elseif rule.type == capture_type then
+    --track entry and exit index value to grab capture value
+
+    else
+        error "unknown type encountered"
+    end
+end
+
 local function eval(d, input)
     assert( d, "need definition")
     assert( d.type == def_type, "need definition" )
     assert( input, "need input")
     assert( type(input) == "string", "input should be a string")
-    local sub = string.sub
-    local at = function (i) return sub(input, i, i) end
     
     local env = d.env
     local entry = d.entry
 
-
+    
 
     
     print(d) 
 end
+
 
 return { rule = rule
        , alt = alt
@@ -116,5 +148,5 @@ return { rule = rule
        , capture = capture 
        , rule_ref = rule_ref
        , match_ref = match_ref
-       , eval = eval
+       , eval = eval 
        }
