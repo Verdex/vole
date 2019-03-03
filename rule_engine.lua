@@ -122,9 +122,36 @@ local function check_rule(rule, env, input, index, at) -- : (success:bool, index
         end 
         return false, index
     elseif rule.type == zero_type then
-
+        local r = rule.rule
+        local outputs = {}
+        local success, temp_index, output = check_rule(r, env, input, index, at)
+        if output then
+            outputs[#outputs+1] = output
+        end
+        while success do
+            success, temp_index, output = check_rule(r, env, input, temp_index, at)
+            if output then
+                outputs[#outputs+1] = output
+            end
+        end
+        return true, temp_index, outputs
     elseif rule.type == one_type then
-
+        local r = rule.rule
+        local outputs = {}
+        local success, temp_index, output = check_rule(r, env, input, index, at)
+        if not success then
+            return false, index
+        end
+        if output then
+            outputs[#outputs+1] = output
+        end
+        while success do
+            success, temp_index, output = check_rule(r, env, input, temp_index, at)
+            if output then
+                outputs[#outputs+1] = output
+            end
+        end
+        return true, temp_index, outputs
     else
         error "unknown type encountered"
     end
