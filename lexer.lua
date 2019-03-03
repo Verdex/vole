@@ -56,8 +56,6 @@ print(s)
 print(i)
 print(o)
 
-
-
 s, i, o = eval(ab, "a", at)
 
 print(s)
@@ -72,6 +70,21 @@ print(o)
 
 
 s, i, o = eval(aorbc, "bc", at)
+
+print(s)
+print(i)
+print(o)
+
+local azbc = def {
+    match( 'a', neap 'a' ),
+    match( 'b', neap 'b' ),
+    match( 'c', neap 'c' ),
+
+    rule( 'main', { m'a', one_or_more( m'b' ), m 'c' }, function (x) return x[1] .. #x[2] .. x[3] end ),
+}
+
+s,i,o = eval( azbc, 'ac', at )
+
 
 print(s)
 print(i)
