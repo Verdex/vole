@@ -140,6 +140,10 @@ local function eval(d, input, indexer)
    
     local success, index, output = check_rule(rule_ref 'main', env, input, 1, indexer)  
 
+    if #input ~= index - 1 then
+        return false, index
+    end
+
     return success, index, output
 end
 

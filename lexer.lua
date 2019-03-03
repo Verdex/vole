@@ -37,6 +37,16 @@ local ab = def {
 
     rule( "main", { r 'a_or_b' }, function (x) return x[1] end ),
 }
+
+local aorbc = def {
+    match( "a", neap "a" ),
+    match( "b", neap "b" ),
+    match( "c", neap "c" ),
+
+    rule( "a_or_b", { alt{ m 'a', m 'b' } }, ikky("a or b") ),
+
+    rule( "main", { r 'a_or_b', m 'c' }, function (x) return x[1] .. x[2] end ),
+}
 local sub = string.sub
 local at = function (s, i) return sub(s, i, i) end
 
@@ -55,6 +65,13 @@ print(i)
 print(o)
 
 s, i, o = eval(ab, "b", at)
+
+print(s)
+print(i)
+print(o)
+
+
+s, i, o = eval(aorbc, "bc", at)
 
 print(s)
 print(i)
