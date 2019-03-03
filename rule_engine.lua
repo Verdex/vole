@@ -27,11 +27,6 @@ local function one_or_more(rule)
     return {type = one_type, rule = rule}
 end
 
-local capture_type = {}
-local function capture(name, rule)
-    return {type = capture_type, name = name, rule = rule}
-end
-
 local rule_type = {}
 -- (rule|match)+  => output
 local function rule(name, rules, output)
@@ -123,9 +118,6 @@ local function check_rule(rule, env, input, index, at) -- : (success:bool, index
 
     elseif rule.type == one_type then
 
-    elseif rule.type == capture_type then
-    --track entry and exit index value to grab capture value
-
     else
         error "unknown type encountered"
     end
@@ -151,7 +143,6 @@ return { rule = rule
        , one_or_more = one_or_more
        , def = def
        , match = match
-       , capture = capture 
        , rule_ref = rule_ref
        , match_ref = match_ref
        , eval = eval 
