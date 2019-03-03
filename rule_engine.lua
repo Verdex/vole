@@ -92,7 +92,7 @@ local function check_rule(rule, env, input, index, at) -- : (success:bool, index
     if rule.type == match_ref_type then
         local m = env.matches[rule.name]
         if m.pred(at(input,index)) then 
-            return m.pred, index + 1 
+            return m.pred, index + 1, at(input, index)
         else
             return false, index
         end
@@ -113,7 +113,14 @@ local function check_rule(rule, env, input, index, at) -- : (success:bool, index
         end
         return true, temp_index, r.output(outputs)
     elseif rule.type == alt_type then
-
+        local rules = rule.rules
+        for _, v in ipairs(rules) do
+            local success, new_index, output = check_rule(v, env, input, index, at)
+            if success then
+                return true, new_index, output 
+            end
+        end 
+        return false, index
     elseif rule.type == zero_type then
 
     elseif rule.type == one_type then
