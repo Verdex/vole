@@ -27,13 +27,14 @@ local blah = def{
 
     rule("cs", {m('comma'), m('semi')}, ikky("cs") ),
     rule("sc", {m('semi'), m('comma')}, ikky( "sc") ),
-    rule("main", {r( 'cs' ), r ('sc')}, ikky( "main") )
+    rule("main", {r( 'cs' ), r ('sc')}, function (x) return x[1] .. "*" .. x[2] end )
 }
 
-s, i, o = eval(blah, ",;;,")
+local sub = string.sub
+local at = function (s, i) return sub(s, i, i) end
+
+s, i, o = eval(blah, ",;;,", at)
 
 print(s)
 print(i)
-for _,v in ipairs(o) do
-    print( v )
-end
+print(o)

@@ -93,10 +93,7 @@ local function match_ref(name)
     return {type = match_ref_type, name = name}
 end
 
-local sub = string.sub
-local at = function (s, i) return sub(s, i, i) end
-
-local function check_rule(rule, env, input, index) -- : (success:bool, index:int, output) 
+local function check_rule(rule, env, input, index, at) -- : (success:bool, index:int, output) 
     if rule.type == match_ref_type then
         local m = env.matches[rule.name]
         if m.pred(at(input,index)) then 
@@ -107,9 +104,11 @@ local function check_rule(rule, env, input, index) -- : (success:bool, index:int
     elseif rule.type == rule_ref_type then
         local r = env.rules[rule.name]
         local temp_index = index
-        local ouputs = {}
+        local outputs = {}
         for _, v in ipairs(r.rules) do
-            local success, temp_index, output = check_rule(v, env, input, temp_index)
+            local success = false
+            local output = false 
+            success, temp_index, output = check_rule(v, env, input, temp_index, at)
             if not success then
                 return false, index
             end
@@ -132,7 +131,7 @@ local function check_rule(rule, env, input, index) -- : (success:bool, index:int
     end
 end
 
-local function eval(d, input)
+local function eval(d, input, indexer)
     assert( d, "need definition")
     assert( d.type == def_type, "need definition" )
     assert( input, "need input")
@@ -140,7 +139,7 @@ local function eval(d, input)
     
     local env = d.env
    
-    local success, index, output = check_rule(rule_ref 'main', env, input, 1)  
+    local success, index, output = check_rule(rule_ref 'main', env, input, 1, indexer)  
 
     return success, index, output
 end
