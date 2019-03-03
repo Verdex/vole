@@ -8,7 +8,7 @@ local function match(name, pred)
 
     return { type = match_type
            , name = name
-           , pred
+           , pred = pred
            }
 end
 
@@ -40,6 +40,7 @@ local function rule(name, rules, output)
     assert(rules, "must include rules")
     assert(#rules ~= 0, "must include rules")
     assert(output, "must include output")
+    assert(type(output) == "function", "output must be a function")
 
     return { type = rule_type
            , name = name
@@ -79,7 +80,7 @@ local function def(items)
     local entry = env.rules["main"]
     assert(entry, "need entry point 'main'")
 
-    return {type = def_type, env = env, entry = entry}
+    return {type = def_type, env = env}
 end
 
 local rule_ref_type = {}
@@ -95,20 +96,28 @@ end
 local sub = string.sub
 local at = function (s, i) return sub(s, i, i) end
 
-local function check_rule(rule, env, input, index) -- : (success:bool, index:int, capture:(name,value))
+local function check_rule(rule, env, input, index) -- : (success:bool, index:int, output) 
     if rule.type == match_ref_type then
-        local m = env[rule.name]
+        local m = env.matches[rule.name]
         if m.pred(at(input,index)) then 
             return m.pred, index + 1 
         else
             return false, index
         end
     elseif rule.type == rule_ref_type then
-        local r = env[rule.name]
+        local r = env.rules[rule.name]
         local temp_index = index
-        for _, v in ipairs(rule.rules) do
-            local success, temp_index, captures = check_rule(v, env, input, temp_index)
+        local ouputs = {}
+        for _, v in ipairs(r.rules) do
+            local success, temp_index, output = check_rule(v, env, input, temp_index)
+            if not success then
+                return false, index
+            end
+            if output then
+                outputs[#outputs+1] = output
+            end
         end
+        return true, temp_index, r.output(outputs)
     elseif rule.type == alt_type then
 
     elseif rule.type == zero_type then
@@ -130,12 +139,10 @@ local function eval(d, input)
     assert( type(input) == "string", "input should be a string")
     
     local env = d.env
-    local entry = d.entry
+   
+    local success, index, output = check_rule(rule_ref 'main', env, input, 1)  
 
-    
-
-    
-    print(d) 
+    return success, index, output
 end
 
 

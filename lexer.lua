@@ -17,13 +17,23 @@ function ikky(v)
     return function(x) return v end
 end
 
-local blah = def{
-    match("comma", ','),
-    match("semi", ';'),
+function neap(v1)
+    return function(v2) return v1 == v2 end
+end
 
-    rule("cs", {m(','), m(';')}, ikky("cs") ),
-    rule("sc", {m(';'), m(',')}, ikky( "sc") ),
+local blah = def{
+    match("comma", neap ','),
+    match("semi", neap ';'),
+
+    rule("cs", {m('comma'), m('semi')}, ikky("cs") ),
+    rule("sc", {m('semi'), m('comma')}, ikky( "sc") ),
     rule("main", {r( 'cs' ), r ('sc')}, ikky( "main") )
 }
 
-eval(blah, "blah")
+s, i, o = eval(blah, ",;;,")
+
+print(s)
+print(i)
+for _,v in ipairs(o) do
+    print( v )
+end
