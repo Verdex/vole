@@ -92,7 +92,7 @@ local function check_rule(rule, env, input, index, at) -- : (success:bool, index
     if rule.type == match_ref_type then
         local m = env.matches[rule.name]
         if m.pred(at(input,index)) then 
-            return m.pred, index + 1, at(input, index)
+            return m.pred, index + 1, { text = at(input, index), index = index }
         else
             return false, index
         end

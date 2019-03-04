@@ -36,8 +36,8 @@ m = rule_engine.match_ref
 
 local regex_match = string.match
 local function match_char(c) return function(o) return o == c end end
-local function start_symbol_char(c) return regex_match(c, '[a-zA-Z_') end
-local function rest_symbol_char(c) return regex_match(c, '[a-zA-Z_0-9') end
+local function start_symbol_char(c) return regex_match(c, '[a-zA-Z_]') end
+local function rest_symbol_char(c) return regex_match(c, '[a-zA-Z_0-9]') end
 
 local lang_def = rule_engine.def {
     match( 'comma', match_char( ',' ) ),
@@ -68,4 +68,5 @@ local function parse( input )
     return true, output
 end
 
-print(parse(','))
+x, v = parse(',')
+
