@@ -29,7 +29,6 @@ local function error_at(text, index)
     local middle_end = find_next_endline(text, index)
     local middle_start = find_prev_endline(text, index)  
 
-
     local first_end = find_next_endline(text, middle_start - 1)
     local first_start = find_prev_endline(text, middle_start - 1)
 
