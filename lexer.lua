@@ -23,7 +23,7 @@
 --]]
 
 local rule_engine = require "rule_engine"
-
+local err = require "error"
 
 alt = rule_engine.alt
 rule = rule_engine.rule
@@ -63,7 +63,7 @@ local function parse( input )
     local at = function ( s, i ) return sub(s, i, i) end
     local success, index, output = rule_engine.eval(lang_def, input, at)
     if not success then
-        return false, "error message with index information"
+        return false, err.error_at(input, index) 
     end
     return true, output
 end
