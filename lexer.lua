@@ -59,6 +59,7 @@ local lex_def = rule_engine.def {
     match( 'r_paren', match_char( ')' ) ), 
     match( 'l_curly', match_char( '{' ) ), 
     match( 'r_curly', match_char( '}' ) ), 
+    match( 'equal', match_char( '=' ) ),
     match( 'dot', match_char( '.' ) ),
     match( 'start_symbol_char', start_symbol_char ),
     match( 'rest_symbol_char', rest_symbol_char ),
@@ -95,6 +96,7 @@ local lex_def = rule_engine.def {
                                      , r 'symbol'
                                      , r 'number'
                                      , m 'whitespace'
+                                     , m 'equal'
                                      } ) 
                   }, 
                   function (x) return x[1] end ),
@@ -118,6 +120,7 @@ end
 
 x, v = lex([[,,;:{.}[]( ) 8 89
 
+=
 10.1048
 
 blah]])
