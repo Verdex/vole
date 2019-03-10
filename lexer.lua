@@ -38,6 +38,7 @@ local regex_match = string.match
 local function match_char(c) return function(o) return o == c end end
 local function start_symbol_char(c) return regex_match(c, '[a-zA-Z_]') end
 local function rest_symbol_char(c) return regex_match(c, '[a-zA-Z_0-9]') end
+local function digit(c) return regex_match(c, '[0-9]') end
 local concat = table.concat
 local function concat_matches(ms)
     local t = {}
@@ -60,6 +61,7 @@ local lex_def = rule_engine.def {
     match( 'dot', match_char( '.' ) ),
     match( 'start_symbol_char', start_symbol_char ),
     match( 'rest_symbol_char', rest_symbol_char ),
+    match( 'digit', digit ), 
 
     rule( 'symbol', { m 'start_symbol_char'
                     , zero_or_more( m 'rest_symbol_char' ) 
@@ -67,6 +69,13 @@ local lex_def = rule_engine.def {
                     function (x) return { name = "symbol"
                                         , index = x[1].index
                                         , value = x[1].text .. concat_matches( x[2] ) 
+                                        } end ),
+
+    rule( 'number', { one_or_more( m 'digit' ) 
+                    }, 
+                    function (x) return { name = "number"
+                                        , index = x[1].index
+                                        , value = concat_matches( x[1] ) 
                                         } end ),
 
     rule( 'main', { zero_or_more( alt{ m 'comma'
@@ -80,6 +89,7 @@ local lex_def = rule_engine.def {
                                      , m 'r_curly'
                                      , m 'dot'
                                      , r 'symbol'
+                                     , r 'number'
                                      } ) 
                   }, 
                   function (x) return x[1] end ),
@@ -95,12 +105,12 @@ local function lex( input )
     return true, output
 end
 
-x, v = lex(',,;:{.}[]()blah')
+x, v = lex(',,;:{.}[]()889blah')
 
 if x then 
     print "success"
     for _,vlet in ipairs( v ) do
-        print( vlet.index, vlet.text, vlet.name )
+        print( vlet.index, vlet.text, vlet.name, vlet.value )
     end
 else
     print "failure"
