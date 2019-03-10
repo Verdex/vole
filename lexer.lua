@@ -39,6 +39,7 @@ local function match_char(c) return function(o) return o == c end end
 local function start_symbol_char(c) return regex_match(c, '[a-zA-Z_]') end
 local function rest_symbol_char(c) return regex_match(c, '[a-zA-Z_0-9]') end
 local function digit(c) return regex_match(c, '[0-9]') end
+local function whitespace(c) return regex_match(c, '%s') end
 local concat = table.concat
 local function concat_matches(ms)
     local t = {}
@@ -62,6 +63,7 @@ local lex_def = rule_engine.def {
     match( 'start_symbol_char', start_symbol_char ),
     match( 'rest_symbol_char', rest_symbol_char ),
     match( 'digit', digit ), 
+    match( 'whitespace', whitespace ),
 
     rule( 'symbol', { m 'start_symbol_char'
                     , zero_or_more( m 'rest_symbol_char' ) 
@@ -90,6 +92,7 @@ local lex_def = rule_engine.def {
                                      , m 'dot'
                                      , r 'symbol'
                                      , r 'number'
+                                     , m 'whitespace'
                                      } ) 
                   }, 
                   function (x) return x[1] end ),
@@ -102,10 +105,18 @@ local function lex( input )
     if not success then
         return false, err.error_at(input, index) 
     end
-    return true, output
+    local ret = {}
+    for _, v in ipairs( output ) do
+        if v.name ~= 'whitespace' then
+            ret[#ret+1] = v
+        end
+    end
+    return true, ret 
 end
 
-x, v = lex(',,;:{.}[]()889blah')
+x, v = lex([[,,;:{.}[]( )889
+
+blah]])
 
 if x then 
     print "success"
