@@ -73,7 +73,9 @@ local lex_def = rule_engine.def {
                                         , value = x[1].text .. concat_matches( x[2] ) 
                                         } end ),
 
-    rule( 'number', { one_or_more( m 'digit' ) 
+    rule( 'number', { one_or_more( alt { m 'digit'
+                                       , m 'dot' 
+                                       } ) 
                     }, 
                     function (x) return { name = "number"
                                         , index = x[1].index
@@ -114,7 +116,9 @@ local function lex( input )
     return true, ret 
 end
 
-x, v = lex([[,,;:{.}[]( )889
+x, v = lex([[,,;:{.}[]( ) 8 89
+
+10.1048
 
 blah]])
 
