@@ -78,7 +78,10 @@ local lex_def = rule_engine.def {
                           , alt { m 'carriage_return', m 'new_line' }
                           }, function(x) return { name = "comment" } end  ),
 
-    --rule( 'line_commnet_eof', ),
+    rule( 'line_comment_eof', { m 'div'
+                              , m 'div'
+                              , zero_or_more( m 'anything_but_endline' )
+                              }, function(x) return { name = "comment" } end ),
     --rule( 'block_comment', ),
 
     rule( 'symbol', { m 'start_symbol_char'
@@ -113,6 +116,7 @@ local lex_def = rule_engine.def {
                                      , m 'whitespace'
                                      , m 'equal'
                                      , r 'line_comment'
+                                     , r 'line_comment_eof'
                                      } ) 
                   }, 
                   function (x) return x[1] end ),
@@ -140,7 +144,8 @@ x, v = lex([[,,;:{.}[]( ) 8 89
 =
 10.1048
 
-blah]])
+blah
+// ]])
 
 if x then 
     print "success"
