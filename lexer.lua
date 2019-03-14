@@ -41,6 +41,7 @@ local function rest_symbol_char(c) return regex_match(c, '[a-zA-Z_0-9]') end
 local function digit(c) return regex_match(c, '[0-9]') end
 local function whitespace(c) return regex_match(c, '%s') end
 local function anything_but_endline(c) return regex_match(c, '[^\r\n]') end
+
 local concat = table.concat
 local function concat_matches(ms)
     local t = {}
@@ -82,7 +83,6 @@ local lex_def = rule_engine.def {
                               , m 'div'
                               , zero_or_more( m 'anything_but_endline' )
                               }, function(x) return { name = "comment" } end ),
-    --rule( 'block_comment', ),
 
     rule( 'symbol', { m 'start_symbol_char'
                     , zero_or_more( m 'rest_symbol_char' ) 
@@ -143,6 +143,7 @@ x, v = lex([[,,;:{.}[]( ) 8 89
 //
 =
 10.1048
+
 
 blah
 // ]])
