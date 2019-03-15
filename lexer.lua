@@ -68,7 +68,6 @@ local lex_def = rule_engine.def {
     match( 'digit', digit ), 
     match( 'whitespace', whitespace ),
     match( 'div', match_char( '/' ) ),
-    match( 'star', match_char( '*' ) ),
     match( 'new_line', match_char( '\n' ) ),
     match( 'carriage_return', match_char( '\r' ) ),
     match( 'anything_but_endline', anything_but_endline ), 
